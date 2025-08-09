@@ -1,0 +1,16 @@
+functionTypes:
+  - name: Job
+    systemDefined: true
+    attributes:
+      - name: externalId
+        dataType: String
+        isRequired: true
+      - name: level
+        dataType: Integer
+        isRequired: false
+  - name: OrgUnit
+    systemDefined: true
+    attributes:
+      - name: externalId
+        dataType: String
+        isRequired: true

@@ -1,0 +1,11 @@
+package com.Hub.organization.repository;
+
+import com.Hub.organization.model.FunctionTypeInstanceModel;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
+
+@Repository
+public interface FunctionTypeInstanceRepository extends JpaRepository<FunctionTypeInstanceModel, UUID> {
+}
