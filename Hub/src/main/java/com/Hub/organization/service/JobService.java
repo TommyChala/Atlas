@@ -1,5 +1,6 @@
 package com.Hub.organization.service;
 
+import com.Hub.organization.dto.FunctionTypeInstanceCreateDTO;
 import com.Hub.organization.dto.JobCreateDTO;
 import com.Hub.organization.mapper.JobMapper;
 import com.Hub.organization.model.FunctionTypeModel;
@@ -63,7 +64,8 @@ public class JobService {
             additionalFields.put("externalId", jobCreateDTO.externalId());
         }
 
-        functionTypeInstanceService.createFunctionTypeInstance(functionType.getId(), newJob.getName(), additionalFields);
+        FunctionTypeInstanceCreateDTO functionTypeInstanceCreateDTO = new FunctionTypeInstanceCreateDTO(functionType.getId(), newJob.getName(), additionalFields);
+        functionTypeInstanceService.createFunctionTypeInstance(functionTypeInstanceCreateDTO);
 
         return ResponseEntity.ok(newJob);
 

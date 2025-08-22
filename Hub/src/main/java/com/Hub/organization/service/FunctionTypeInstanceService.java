@@ -1,5 +1,6 @@
 package com.Hub.organization.service;
 
+import com.Hub.organization.dto.FunctionTypeInstanceCreateDTO;
 import com.Hub.organization.model.FunctionTypeAttributeModel;
 import com.Hub.organization.model.FunctionTypeAttributeValueModel;
 import com.Hub.organization.model.FunctionTypeInstanceModel;
@@ -7,6 +8,7 @@ import com.Hub.organization.model.FunctionTypeModel;
 import com.Hub.organization.repository.FunctionTypeAttributeRepository;
 import com.Hub.organization.repository.FunctionTypeInstanceRepository;
 import com.Hub.organization.repository.FunctionTypeRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,47 +20,48 @@ import java.util.Map;
 @Service
 public class FunctionTypeInstanceService {
 
-    @Autowired
-    private FunctionTypeRepository functionTypeRepository;
+    private final FunctionTypeRepository functionTypeRepository;
 
-    @Autowired
-    private FunctionTypeInstanceRepository functionTypeInstanceRepository;
+    private final FunctionTypeInstanceRepository functionTypeInstanceRepository;
 
-    @Autowired
-    private FunctionTypeAttributeRepository functionTypeAttributeRepository;
 
-    public FunctionTypeInstanceModel createFunctionTypeInstance (int functionTypeId, String name, Map<String, String> inputValues) {
-        if (inputValues == null) {
-            inputValues = Collections.emptyMap();
-        }
-        FunctionTypeModel functionType = functionTypeRepository.findById(functionTypeId)
-                .orElseThrow(() -> new RuntimeException("FunctionTypeModel not found")
+    public FunctionTypeInstanceService (FunctionTypeRepository functionTypeRepository, FunctionTypeInstanceRepository functionTypeInstanceRepository) {
+        this.functionTypeRepository = functionTypeRepository;
+        this.functionTypeInstanceRepository = functionTypeInstanceRepository;
+    }
+
+    public FunctionTypeInstanceModel createFunctionTypeInstance (FunctionTypeInstanceCreateDTO createDTO) {
+
+        Map<String, String> inputValues = createDTO.inputValues() != null ? createDTO.inputValues() : Collections.emptyMap();
+        FunctionTypeModel functionType = functionTypeRepository.findById(createDTO.functionTypeId())
+                .orElseThrow(() -> new EntityNotFoundException("FunctionTypeModel not found")
                 );
         FunctionTypeInstanceModel newInstance = new FunctionTypeInstanceModel();
-        newInstance.setName(name);
+        newInstance.setName(createDTO.name());
         newInstance.setFunctionType(functionType);
+
 
         List<FunctionTypeAttributeValueModel> valueModels = new ArrayList<>();
         for (FunctionTypeAttributeModel attribute : functionType.getAttributes()) {
             String inputValue = inputValues.get(attribute.getName());
-            if (inputValue == null) {
-                if (attribute.getIsRequired()) {
-                    throw new IllegalArgumentException("Missing value for required attribute: " + attribute.getName());
-                } else {
-                continue;
-                }
+            if (inputValue == null && attribute.getIsRequired()) {
+                throw new IllegalArgumentException("Missing value for required attribute: " + attribute.getName());
             }
-            FunctionTypeAttributeValueModel valueModel = new FunctionTypeAttributeValueModel();
-            valueModel.setInstance(newInstance);
-            valueModel.setAttribute(attribute);
-            valueModel.setValue(inputValue);
+            if (inputValue != null) {
 
-            valueModels.add(valueModel);
+                FunctionTypeAttributeValueModel valueModel = new FunctionTypeAttributeValueModel();
+                valueModel.setInstance(newInstance);
+                valueModel.setAttribute(attribute);
+                valueModel.setValue(inputValue);
+
+                valueModels.add(valueModel);
+            }
         }
 
-        newInstance.setAttributeValues(valueModels);
+            newInstance.setAttributeValues(valueModels);
 
-        return functionTypeInstanceRepository.save(newInstance);
 
-    }
+            return functionTypeInstanceRepository.save(newInstance);
+
+        }
 }

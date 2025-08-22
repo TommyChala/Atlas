@@ -1,13 +1,10 @@
 package com.Hub.organization.service;
 
+import com.Hub.organization.dto.FunctionTypeInstanceCreateDTO;
 import com.Hub.organization.dto.OrganizationalUnitCreateDTO;
 import com.Hub.organization.mapper.OrganizationalUnitMapper;
-import com.Hub.organization.model.FunctionTypeAttributeModel;
-import com.Hub.organization.model.FunctionTypeInstanceModel;
 import com.Hub.organization.model.FunctionTypeModel;
 import com.Hub.organization.model.OrganizationalUnitModel;
-import com.Hub.organization.repository.FunctionTypeAttributeRepository;
-import com.Hub.organization.repository.FunctionTypeInstanceRepository;
 import com.Hub.organization.repository.FunctionTypeRepository;
 import com.Hub.organization.repository.OrganizationalUnitRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -63,7 +60,8 @@ public class OrganizationalUnitService {
                 additionalFields.put("externalId", createDTO.externalId());
             }
 
-            functionTypeInstanceService.createFunctionTypeInstance(functionType.getId(), newOU.getName(), additionalFields);
+        FunctionTypeInstanceCreateDTO functionTypeInstanceCreateDTO = new FunctionTypeInstanceCreateDTO(functionType.getId(), newOU.getName(), additionalFields);
+        functionTypeInstanceService.createFunctionTypeInstance(functionTypeInstanceCreateDTO);
 
             return ResponseEntity.ok(newOU);
         }

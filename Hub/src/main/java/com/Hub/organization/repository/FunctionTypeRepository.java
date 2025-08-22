@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface FunctionTypeRepository extends JpaRepository<FunctionTypeModel, Integer> {
-    Optional<FunctionTypeModel> findByName (String name);
+    Optional<FunctionTypeModel> findByName(String name);
 }
