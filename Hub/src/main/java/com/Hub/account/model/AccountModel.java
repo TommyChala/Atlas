@@ -4,28 +4,36 @@ import com.Hub.resourceAssignment.model.ResourceAssignmentModel;
 import com.Hub.system.model.SystemModel;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "Account",
+@Table(name = "account",
         uniqueConstraints = @UniqueConstraint(columnNames = "accountId")
 )
 public class AccountModel {
 
     @Id
-    @Column(name = "uid", nullable = false, unique = true, updatable = false)
+    @Column(name = "uid", nullable = false, updatable = false)
     @GeneratedValue
     private UUID uid;
+
     @Column(name = "accountId")
     private String accountId;
+
     @Column(name = "accountName")
     private String accountName;
+
     @ManyToOne
     @JoinColumn(name = "SystemId")
     private SystemModel system;
-    @OneToMany(mappedBy = "account")
-    private List<ResourceAssignmentModel> assignment;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AccountAttributeValueModel> values = new ArrayList<>();
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ResourceAssignmentModel> assignment = new ArrayList<>();
 
     public AccountModel () {}
 

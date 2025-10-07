@@ -1,7 +1,9 @@
 package com.Hub.system.dto;
 
-public record CreateDTO(
-        String name,
-        String type
+public record MappingConfigModelCreateDTO(
+        String sourceAttribute,
+        String targetAttribute,
+        String systemId,
+        String dataType
 ) {
 }

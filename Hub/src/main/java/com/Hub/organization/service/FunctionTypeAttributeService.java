@@ -2,10 +2,9 @@ package com.Hub.organization.service;
 
 import com.Hub.organization.dto.FunctionTypeAttributeCreateDTO;
 import com.Hub.organization.dto.FunctionTypeAttributeResponseDTO;
-import com.Hub.organization.exception.FunctionTypeAttributeAlreadyExists;
+import com.Hub.organization.exception.FunctionTypeAttributeAlreadyExistsException;
 import com.Hub.organization.mapper.FunctionTypeAttributeMapper;
 import com.Hub.organization.model.FunctionTypeAttributeModel;
-import com.Hub.organization.model.FunctionTypeModel;
 import com.Hub.organization.repository.FunctionTypeAttributeRepository;
 import com.Hub.organization.repository.FunctionTypeRepository;
 import org.springframework.http.HttpStatus;
@@ -32,7 +31,7 @@ public class FunctionTypeAttributeService {
         Optional<FunctionTypeAttributeModel> existingAttr = functionTypeAttributeRepository.findByName(createRequest.name());
         if (existingAttr.isPresent()) {
             if (existingAttr.get().getFunctionType().getId() == createRequest.functionTypeId()) {
-                throw new FunctionTypeAttributeAlreadyExists("An attribute with that name already exists for this function type.");
+                throw new FunctionTypeAttributeAlreadyExistsException("An attribute with that name already exists for this function type.");
             }
         }
         FunctionTypeAttributeModel newFunctionTypeAttribute = functionTypeAttributeMapper.toModel(createRequest);
@@ -44,5 +43,3 @@ public class FunctionTypeAttributeService {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 }
-
-//FINISH functiontypeattributeresponseDTO and mapper for return in service class!

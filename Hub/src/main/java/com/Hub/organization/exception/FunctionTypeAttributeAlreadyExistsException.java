@@ -1,7 +1,7 @@
 package com.Hub.organization.exception;
 
-public class FunctionTypeAttributeAlreadyExists extends RuntimeException {
-    public FunctionTypeAttributeAlreadyExists(String message) {
+public class FunctionTypeAttributeAlreadyExistsException extends RuntimeException {
+    public FunctionTypeAttributeAlreadyExistsException(String message) {
         super(message);
     }
 }

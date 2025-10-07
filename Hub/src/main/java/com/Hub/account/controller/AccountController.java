@@ -1,5 +1,6 @@
 package com.Hub.account.controller;
 
+import com.Hub.account.dto.AccountModelCreateDTO;
 import com.Hub.account.model.AccountModel;
 import com.Hub.account.service.AccountService;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountModel> createNew(@RequestBody AccountModel accountModel) {
-        return ResponseEntity.ok(accountService.createNew(accountModel));
+    public ResponseEntity<AccountModel> createNew(@RequestBody AccountModelCreateDTO accountModelCreateDTO) {
+        return ResponseEntity.ok(accountService.createNew(accountModelCreateDTO));
     }
 }
