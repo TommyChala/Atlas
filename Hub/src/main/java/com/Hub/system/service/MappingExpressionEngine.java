@@ -63,23 +63,23 @@ public class MappingExpressionEngine {
 
             if (transformedValue == null) continue;
 
-            String targetAttr = mapping.getTargetAttribute();
+            String targetAttr = mapping.getTargetAttribute().getName();
             if ("accountId".equalsIgnoreCase(targetAttr)) {
                 account.setAccountId(transformedValue.toString());
                 continue;
             } else if ("accountName".equalsIgnoreCase(targetAttr)) {
-                account.setAccountName(transformedValue.toString());
+              //  account.setAccountName(transformedValue.toString());
                 continue;
             }
 
             // persist (upsert-like behavior)
             AccountAttributeValueModel attributeValue =
-                    iAccountAttributeValueRepository.findByAccountAndAttribute_Name(account, mapping.getTargetAttribute())
+                    iAccountAttributeValueRepository.findByAccountAndAttribute_Name(account, mapping.getTargetAttribute().getName())
                             .orElseGet(AccountAttributeValueModel::new);
 
             attributeValue.setAccount(account);
 
-            AccountAttributeModel attribute = iAccountAttributeRepository.findByName(mapping.getTargetAttribute())
+            AccountAttributeModel attribute = iAccountAttributeRepository.findByName(mapping.getTargetAttribute().getName())
                     .orElseThrow(() -> new AccountAttributeNotFoundException("Attribute not found"));
             attributeValue.setAttribute(attribute);
 

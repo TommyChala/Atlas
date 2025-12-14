@@ -6,61 +6,41 @@ import jakarta.persistence.Entity;
 
 import java.nio.file.Path;
 
-public class CollectorSource {
-    private Path file;
-    private String apiEndpoint;
-    private Object ldapConnection;
-    private Long systemId;
-    private CollectorType collectorType;
-    private EntityType entityType;
+public abstract class CollectorSource {
+
+    private String systemId;
+    private String collectorTypeStr;
+    private String entityTypeStr;
+
+    public CollectorSource(String systemId, String collectorType, String entityTypeStr) {
+        this.systemId = systemId;
+        this.collectorTypeStr = collectorType;
+        this.entityTypeStr = entityTypeStr;
+    }
 
     public CollectorSource () {}
 
-    public Path getFile() {
-        return file;
-    }
-
-    public void setFile(Path file) {
-        this.file = file;
-    }
-
-    public String getApiEndpoint() {
-        return apiEndpoint;
-    }
-
-    public void setApiEndpoint(String apiEndpoint) {
-        this.apiEndpoint = apiEndpoint;
-    }
-
-    public Object getLdapConnection() {
-        return ldapConnection;
-    }
-
-    public void setLdapConnection(Object ldapConnection) {
-        this.ldapConnection = ldapConnection;
-    }
-
-    public Long getSystemId() {
+    public String getSystemId() {
         return systemId;
     }
 
-    public void setSystemId(Long systemId) {
+    public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
 
-    public CollectorType getCollectorType() {
-        return collectorType;
+    public String getCollectorTypeStr() {
+        return collectorTypeStr;
     }
 
-    public void setCollectorType(CollectorType collectorType) {
-        this.collectorType = collectorType;
+    public void setCollectorTypeStr(String collectorTypeStr) {
+        this.collectorTypeStr = collectorTypeStr;
     }
 
-    public EntityType getEntityType() {
-        return entityType;
+    public String getEntityTypeStr() {
+        return entityTypeStr;
     }
 
-    public void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
+    public void setEntityTypeStr(String entityTypeStr) {
+        this.entityTypeStr = entityTypeStr;
     }
 }

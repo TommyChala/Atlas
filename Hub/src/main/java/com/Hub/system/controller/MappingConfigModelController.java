@@ -1,25 +1,35 @@
 package com.Hub.system.controller;
 
+import com.Hub.system.dto.MappingConfigCreateBatchDTO;
 import com.Hub.system.dto.MappingConfigModelCreateDTO;
 import com.Hub.system.model.MappingConfigModel;
 import com.Hub.system.service.MappingConfigModelService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.Hub.system.utility.MappingConfigValidator;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/mappingConfigModel")
 public class MappingConfigModelController {
 
     private final MappingConfigModelService mappingConfigModelService;
+    private final MappingConfigValidator mappingConfigValidator;
 
-    public MappingConfigModelController (MappingConfigModelService mappingConfigModelService) {
+    public MappingConfigModelController (MappingConfigModelService mappingConfigModelService, MappingConfigValidator mappingConfigValidator) {
         this.mappingConfigModelService = mappingConfigModelService;
+        this.mappingConfigValidator = mappingConfigValidator;
     }
 
     @PostMapping
-    public MappingConfigModel addNew (@RequestBody MappingConfigModelCreateDTO mappingConfigModelCreateDTO) {
-        return mappingConfigModelService.addNew(mappingConfigModelCreateDTO);
+    public ResponseEntity<Object> addNew (
+            @RequestBody MappingConfigCreateBatchDTO batchDto
+    ) {
+        mappingConfigValidator.validateMandatoryAttributes(batchDto.data(), batchDto.systemId());
+        batchDto.data().forEach(
+                mapping -> mappingConfigModelService.addNew(mapping, batchDto.systemId())
+        );
+        return ResponseEntity.ok().build();
     }
 }

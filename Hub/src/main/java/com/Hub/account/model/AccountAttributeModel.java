@@ -1,6 +1,8 @@
 package com.Hub.account.model;
 
 import com.Hub.account.enums.DataType;
+import com.Hub.system.model.MappingConfigModel;
+import com.Hub.system.model.SystemModel;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -25,10 +27,27 @@ public class AccountAttributeModel {
     @Column(name = "dataType", nullable = false)
     private DataType dataType;
 
+    @Column(name = "required", nullable = false)
+    private boolean required;
+
+    @ManyToOne
+    @JoinColumn(name = "system")
+    private SystemModel system;
+
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AccountAttributeValueModel> values = new ArrayList<>();
 
+    @OneToMany(mappedBy = "targetAttribute", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MappingConfigModel> sourceAttributes = new ArrayList<>();
+
     public AccountAttributeModel () {}
+
+    public AccountAttributeModel (String name, String displayName, DataType dataType, boolean required) {
+        this.name = name;
+        this.displayName = displayName;
+        this.dataType = dataType;
+        this.required = required;
+    }
 
     public UUID getId() {
         return id;
@@ -68,5 +87,29 @@ public class AccountAttributeModel {
 
     public void setValues(List<AccountAttributeValueModel> values) {
         this.values = values;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    public List<MappingConfigModel> getSourceAttributes() {
+        return sourceAttributes;
+    }
+
+    public void setSourceAttributes(List<MappingConfigModel> sourceAttributes) {
+        this.sourceAttributes = sourceAttributes;
+    }
+
+    public SystemModel getSystem() {
+        return system;
+    }
+
+    public void setSystem(SystemModel system) {
+        this.system = system;
     }
 }

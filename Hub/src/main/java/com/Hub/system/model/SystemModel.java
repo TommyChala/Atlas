@@ -1,5 +1,6 @@
 package com.Hub.system.model;
 
+import com.Hub.account.model.AccountAttributeModel;
 import com.Hub.account.model.AccountModel;
 import com.Hub.resource.model.ResourceModel;
 import com.Hub.system.enums.Protocol;
@@ -46,6 +47,9 @@ public class SystemModel {
 
     @OneToMany(mappedBy = "system", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MappingConfigModel> mappingConfigModels = new ArrayList<>();
+
+    @OneToMany(mappedBy = "system", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AccountAttributeModel> accountAttributeModels = new ArrayList<>();
 
     public SystemModel () {}
 
@@ -111,5 +115,21 @@ public class SystemModel {
 
     public void setResources(List<ResourceModel> resources) {
         this.resources = resources;
+    }
+
+    public List<MappingConfigModel> getMappingConfigModels() {
+        return mappingConfigModels;
+    }
+
+    public void setMappingConfigModels(List<MappingConfigModel> mappingConfigModels) {
+        this.mappingConfigModels = mappingConfigModels;
+    }
+
+    public List<AccountAttributeModel> getAccountAttributeModels() {
+        return accountAttributeModels;
+    }
+
+    public void setAccountAttributeModels(List<AccountAttributeModel> accountAttributeModels) {
+        this.accountAttributeModels = accountAttributeModels;
     }
 }

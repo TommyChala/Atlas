@@ -27,7 +27,7 @@ public class AccountService {
     public AccountModel createNew(AccountModelCreateDTO accountModelCreateDTO) {
         AccountModel account = new AccountModel();
         account.setAccountId(accountModelCreateDTO.accountId());
-        account.setAccountName(accountModelCreateDTO.accountName());
+        //account.setAccountName(accountModelCreateDTO.accountName());
         SystemModel system = systemRepository.findBySystemId(accountModelCreateDTO.systemId())
                 .orElseThrow(() -> new RuntimeException("Unable to create account. No system found with referenced id")
                 );

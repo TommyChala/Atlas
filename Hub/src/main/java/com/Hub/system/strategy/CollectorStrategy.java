@@ -1,10 +1,10 @@
 package com.Hub.system.strategy;
 
-import com.Hub.system.model.CollectorSource;
+import com.Hub.system.dto.CollectorSourceCreateRequest;
+import com.Hub.system.enums.CollectorType;
 
-import java.util.Map;
-import java.util.stream.Stream;
+public interface CollectorStrategy<T> {
+    CollectorType getType();
 
-public interface CollectorStrategy {
-    Stream<Map<String, String>> collect(CollectorSource source) throws Exception;
+    void collect(CollectorSourceCreateRequest source);
 }

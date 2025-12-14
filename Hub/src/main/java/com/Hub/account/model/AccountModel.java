@@ -22,11 +22,8 @@ public class AccountModel {
     @Column(name = "accountId")
     private String accountId;
 
-    @Column(name = "accountName")
-    private String accountName;
-
     @ManyToOne
-    @JoinColumn(name = "SystemId")
+    @JoinColumn(name = "systemId")
     private SystemModel system;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -37,10 +34,9 @@ public class AccountModel {
 
     public AccountModel () {}
 
-    public AccountModel (UUID Uid, String AccountId, String AccountName, SystemModel system) {
+    public AccountModel (UUID Uid, String AccountId, SystemModel system) {
         this.uid = Uid;
         this.accountId = AccountId;
-        this.accountName = AccountName;
         this.system = system;
     }
 
@@ -56,19 +52,27 @@ public class AccountModel {
         this.accountId = accountId;
     }
 
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
     public SystemModel getSystem () {
         return system;
     }
 
     public void setSystem (SystemModel system) {
         this.system = system;
+    }
+
+    public List<AccountAttributeValueModel> getValues() {
+        return values;
+    }
+
+    public void setValues(List<AccountAttributeValueModel> values) {
+        this.values = values;
+    }
+
+    public List<ResourceAssignmentModel> getAssignment() {
+        return assignment;
+    }
+
+    public void setAssignment(List<ResourceAssignmentModel> assignment) {
+        this.assignment = assignment;
     }
 }

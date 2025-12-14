@@ -1,5 +1,6 @@
 package com.Hub.system.model;
 
+import com.Hub.account.model.AccountAttributeModel;
 import com.Hub.system.enums.MappingConfigDataType;
 import jakarta.persistence.*;
 
@@ -24,8 +25,9 @@ public class MappingConfigModel {
     @Column(name = "source_attribute", nullable = false)
     private String sourceAttribute;
 
-    @Column(name = "target_attribute", nullable = false, unique = true)
-    private String targetAttribute;
+    @ManyToOne
+    @JoinColumn(name = "target_attribute", nullable = false)
+    private AccountAttributeModel targetAttribute;
 
     @Column(name = "datatype", nullable = false)
     private MappingConfigDataType dataType;
@@ -35,7 +37,7 @@ public class MappingConfigModel {
 
     public MappingConfigModel () {}
 
-    public MappingConfigModel(UUID id, SystemModel system, String sourceAttribute, String targetAttribute, List<MappingExpressionModel> expressions) {
+    public MappingConfigModel(UUID id, SystemModel system, String sourceAttribute, AccountAttributeModel targetAttribute, List<MappingExpressionModel> expressions) {
         this.id = id;
         this.system = system;
         this.sourceAttribute = sourceAttribute;
@@ -67,11 +69,11 @@ public class MappingConfigModel {
         this.sourceAttribute = sourceAttribute;
     }
 
-    public String getTargetAttribute() {
+    public AccountAttributeModel getTargetAttribute() {
         return targetAttribute;
     }
 
-    public void setTargetAttribute(String targetAttribute) {
+    public void setTargetAttribute(AccountAttributeModel targetAttribute) {
         this.targetAttribute = targetAttribute;
     }
 
