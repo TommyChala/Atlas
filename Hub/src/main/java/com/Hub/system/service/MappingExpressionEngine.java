@@ -1,132 +1,93 @@
 package com.Hub.system.service;
 
-import com.Hub.account.model.AccountAttributeModel;
-import com.Hub.account.model.AccountAttributeValueModel;
-import com.Hub.account.model.AccountModel;
-import com.Hub.account.repository.IAccountAttributeRepository;
-import com.Hub.account.repository.IAccountAttributeValueRepository;
-import com.Hub.system.exception.AccountAttributeNotFoundException;
 import com.Hub.system.model.MappingConfigModel;
 import com.Hub.system.model.MappingExpressionModel;
+import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
 
 @Service
 public class MappingExpressionEngine {
 
-    private final ExpressionParser expressionParser = new SpelExpressionParser();
-    private final IAccountAttributeValueRepository iAccountAttributeValueRepository;
-    private final IAccountAttributeRepository iAccountAttributeRepository;
+    private final ExpressionParser parser = new SpelExpressionParser();
 
-    public MappingExpressionEngine(IAccountAttributeValueRepository iAccountAttributeValueRepository, IAccountAttributeRepository iAccountAttributeRepository) {
-        this.iAccountAttributeValueRepository = iAccountAttributeValueRepository;
-        this.iAccountAttributeRepository = iAccountAttributeRepository;
+    public Object calculateValue(MappingConfigModel mapping, Map<String, String> rowMap) {
+        return switch (mapping.getMappingType()) {
+            case DIRECT -> getValueIgnoreCase(rowMap, mapping.getSourceAttribute());
+            case CONSTANT -> getConstantValue(mapping);
+            case TRANSFORMATION -> evaluateTransformation(mapping, rowMap);
+            default -> null;
+        };
     }
 
-    public void evaluateRow(
-            Map<String, String> sourceRow,
-            List<MappingConfigModel> mappings,
-            AccountModel account
-    ) {
-        StandardEvaluationContext context = new StandardEvaluationContext();
+    private Object evaluateTransformation(MappingConfigModel mapping, Map<String, String> rowMap) {
+        String rawValue = getValueIgnoreCase(rowMap, mapping.getSourceAttribute());
 
-        sourceRow.forEach(context::setVariable);
+        // Short-circuit: if the CSV cell is empty, we don't transform
+        if (rawValue == null) {
+            return null;
+        }
 
-        for (MappingConfigModel mapping : mappings) {
-            Object transformedValue;
+        String expressionString = getActiveExpressionString(mapping);
+        if (expressionString == null) {
+            return rawValue; // Fail-safe: return raw data if expression record is missing
+        }
 
-            // pick active expression (if any)
-            MappingExpressionModel activeExpr = mapping.getExpressions().stream()
-                    .filter(MappingExpressionModel::isActive)
-                    .findFirst()
-                    .orElse(null);
+        return runSpel(expressionString, rawValue, rowMap);
+    }
 
-            try {
-                if (activeExpr != null) {
-                    transformedValue = expressionParser.parseExpression(activeExpr.getExpression())
-                            .getValue(context);
-                } else {
-                    // no expression = pass-through
-                    transformedValue = sourceRow.get(mapping.getSourceAttribute());
-                }
-            } catch (Exception e) {
-                // fallback if expression fails
-                transformedValue = sourceRow.get(mapping.getSourceAttribute());
-                // TODO: log the error
-            }
+    private Object getConstantValue(MappingConfigModel mapping) {
+        // We look for the active expression record, but treat it as a literal string
+        return getActiveExpressionString(mapping);
+    }
 
-            if (transformedValue == null) continue;
+    private String getActiveExpressionString(MappingConfigModel mapping) {
+        if (mapping.getExpressions() == null) return null;
 
-            String targetAttr = mapping.getTargetAttribute().getName();
-            if ("accountId".equalsIgnoreCase(targetAttr)) {
-                account.setAccountId(transformedValue.toString());
-                continue;
-            } else if ("accountName".equalsIgnoreCase(targetAttr)) {
-              //  account.setAccountName(transformedValue.toString());
-                continue;
-            }
+        return mapping.getExpressions().stream()
+                .filter(MappingExpressionModel::isActive)
+                .map(MappingExpressionModel::getExpression)
+                .findFirst()
+                .orElse(null);
+    }
+    /**
+     * The Helper Method: Standardizes how we find values in the CSV row Map.
+     * This solves the "AccountName" vs "accountname" case sensitivity issues.
+     */
+    private String getValueIgnoreCase(Map<String, String> rowMap, String sourceAttr) {
+        if (sourceAttr == null || sourceAttr.isBlank()) return null;
 
-            // persist (upsert-like behavior)
-            AccountAttributeValueModel attributeValue =
-                    iAccountAttributeValueRepository.findByAccountAndAttribute_Name(account, mapping.getTargetAttribute().getName())
-                            .orElseGet(AccountAttributeValueModel::new);
+        // 1. Quick check for exact match
+        if (rowMap.containsKey(sourceAttr)) {
+            return rowMap.get(sourceAttr);
+        }
 
-            attributeValue.setAccount(account);
+        // 2. Fuzzy check: ignore case and trim spaces
+        return rowMap.entrySet().stream()
+                .filter(e -> e.getKey().trim().equalsIgnoreCase(sourceAttr.trim()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+    }
 
-            AccountAttributeModel attribute = iAccountAttributeRepository.findByName(mapping.getTargetAttribute().getName())
-                    .orElseThrow(() -> new AccountAttributeNotFoundException("Attribute not found"));
-            attributeValue.setAttribute(attribute);
+    private Object runSpel(String expressionString, String val, Map<String, String> row) {
+        try {
+            Expression expression = parser.parseExpression(expressionString);
+            StandardEvaluationContext context = new StandardEvaluationContext();
 
-            if (transformedValue != null) {
-                switch (mapping.getDataType()) {
-                    case STRING:
-                        attributeValue.setStringValue(transformedValue.toString());
-                        break;
-                    case INTEGER:
-                        attributeValue.setIntValue(Integer.valueOf(transformedValue.toString()));
-                        break;
-                    case DATETIME:
-                        attributeValue.setDatetimeValue(LocalDateTime.parse(transformedValue.toString()));
-                        break;
-                    case DOUBLE:
-                        attributeValue.setDoubleValue(Double.valueOf(transformedValue.toString()));
-                        break;
-                }
-            }
+            context.setVariable("val", val);
+            context.setVariable("row", row);
 
-            iAccountAttributeValueRepository.save(attributeValue);
+            return expression.getValue(context);
+        } catch (Exception e) {
+            System.err.println("SpEL Error [" + expressionString + "]: " + e.getMessage());
+            return null;
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

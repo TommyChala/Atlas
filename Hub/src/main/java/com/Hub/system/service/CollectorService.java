@@ -1,10 +1,8 @@
 package com.Hub.system.service;
 
-import com.Hub.system.dto.CollectorSourceCreateRequest;
-import com.Hub.system.strategy.CollectorStrategy;
+import com.Hub.system.dto.CollectorRawCreateRequest;
+import com.Hub.system.repository.IImportJobModelRepository;
 import com.Hub.system.utility.CollectorFactory;
-import org.springframework.data.repository.Repository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
@@ -13,15 +11,32 @@ import java.util.concurrent.CompletableFuture;
 public class CollectorService {
 
     private final CollectorFactory collectorFactory;
+    private final IImportJobModelRepository importJobModelRepository;
 
-    public CollectorService(CollectorFactory collectorFactory) {
+    public CollectorService(
+            CollectorFactory collectorFactory,
+            IImportJobModelRepository importJobModelRepository) {
         this.collectorFactory = collectorFactory;
+        this.importJobModelRepository = importJobModelRepository;
     }
 
-    public CompletableFuture<Void> start(CollectorSourceCreateRequest request, Long jobId) {
+    public CompletableFuture<Void> start(CollectorRawCreateRequest request, Long jobId) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                collectorFactory.getStrategy(request).collect(request);
+                updateJobStatus(jobId, "In Progress", "Staging done");
+                // return CompletableFuture.completedFuture(null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 
-        collectorFactory.getStrategy(request).collect(request);
-        return CompletableFuture.completedFuture(null);
+    private void updateJobStatus (Long jobId, String status, String message) {
+        importJobModelRepository.findById(jobId).ifPresent(job -> {
+            job.setJobStatus(status);
+            importJobModelRepository.save(job);
+        });
     }
 
 }

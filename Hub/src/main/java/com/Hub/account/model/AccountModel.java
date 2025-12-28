@@ -19,7 +19,7 @@ public class AccountModel {
     @GeneratedValue
     private UUID uid;
 
-    @Column(name = "accountId")
+    @Column(name = "accountId", nullable = false)
     private String accountId;
 
     @ManyToOne

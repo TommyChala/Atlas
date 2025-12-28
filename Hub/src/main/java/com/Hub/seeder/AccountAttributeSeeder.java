@@ -20,9 +20,11 @@ public class AccountAttributeSeeder implements ApplicationRunner {
         addMandatoryAttributes();
     }
     public void addMandatoryAttributes () {
+        AccountAttributeModel businessKey = new AccountAttributeModel("businessKey", "BusinessKey", DataType.STRING, true);
         AccountAttributeModel accountName = new AccountAttributeModel("AccountName", "AccountName", DataType.STRING, true);
         AccountAttributeModel status = new AccountAttributeModel("status", "status", DataType.STRING, true);
 
+        accountAttributeRepository.save(businessKey);
         accountAttributeRepository.save(accountName);
         accountAttributeRepository.save(status);
     }

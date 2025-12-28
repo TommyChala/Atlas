@@ -2,6 +2,7 @@ package com.Hub.system.model;
 
 import com.Hub.account.model.AccountAttributeModel;
 import com.Hub.system.enums.MappingConfigDataType;
+import com.Hub.system.enums.MappingType;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -10,7 +11,13 @@ import java.util.UUID;
 
 @Entity
 @Table(
-        name = "mapping_config"
+        name = "mapping_config",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_mapping_config_system_target",
+                        columnNames = {"system_id", "target_attribute"}
+                )
+        }
 )
 public class MappingConfigModel {
 
@@ -22,27 +29,46 @@ public class MappingConfigModel {
     @JoinColumn(name = "system_id", nullable = false)
     private SystemModel system;
 
-    @Column(name = "source_attribute", nullable = false)
+    @Column(name = "source_attribute")
     private String sourceAttribute;
 
     @ManyToOne
     @JoinColumn(name = "target_attribute", nullable = false)
     private AccountAttributeModel targetAttribute;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "datatype", nullable = false)
     private MappingConfigDataType dataType;
 
-    @OneToMany(mappedBy = "mappingConfig", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mapping_type", nullable = false)
+    private MappingType mappingType;
+
+    @OneToMany(
+            mappedBy = "mappingConfig",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
     private List<MappingExpressionModel> expressions = new ArrayList<>();
 
     public MappingConfigModel () {}
 
-    public MappingConfigModel(UUID id, SystemModel system, String sourceAttribute, AccountAttributeModel targetAttribute, List<MappingExpressionModel> expressions) {
+    public MappingConfigModel(
+            UUID id,
+            SystemModel system,
+            String sourceAttribute,
+            AccountAttributeModel targetAttribute,
+            MappingConfigDataType dataType, // ADD THIS
+            List<MappingExpressionModel> expressions,
+            MappingType mappingType
+    ) {
         this.id = id;
         this.system = system;
         this.sourceAttribute = sourceAttribute;
         this.targetAttribute = targetAttribute;
+        this.dataType = dataType; // ADD THIS
         this.expressions = expressions;
+        this.mappingType = mappingType;
     }
 
     public UUID getId() {
@@ -91,5 +117,13 @@ public class MappingConfigModel {
 
     public void setDataType(MappingConfigDataType dataType) {
         this.dataType = dataType;
+    }
+
+    public MappingType getMappingType() {
+        return mappingType;
+    }
+
+    public void setMappingType(MappingType mappingType) {
+        this.mappingType = mappingType;
     }
 }

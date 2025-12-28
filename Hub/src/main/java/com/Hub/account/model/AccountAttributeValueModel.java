@@ -30,7 +30,7 @@ public class AccountAttributeValueModel {
     @Column(name = "value_string")
     private String stringValue;
 
-    @Column(name = "value_int")
+    @Column(name = "value_integer")
     private Integer intValue;
 
     @Column(name = "value_datetime")
@@ -39,9 +39,22 @@ public class AccountAttributeValueModel {
     @Column(name = "value_float")
     private Double doubleValue;
 
+    @Column(name = "value_boolean")
+    private boolean booleanValue;
+
     public AccountAttributeValueModel () {}
 
-    public AccountAttributeValueModel(UUID id, AccountAttributeModel attribute, AccountModel account, boolean isRowLatest, String stringValue, Integer intValue, LocalDateTime datetimeValue, Double doubleValue) {
+    public AccountAttributeValueModel(
+            UUID id,
+            AccountAttributeModel attribute,
+            AccountModel account,
+            boolean isRowLatest,
+            String stringValue,
+            Integer intValue,
+            LocalDateTime datetimeValue,
+            Double doubleValue,
+            boolean booleanValue
+    ) {
         this.id = id;
         this.attribute = attribute;
         this.account = account;
@@ -50,6 +63,7 @@ public class AccountAttributeValueModel {
         this.intValue = intValue;
         this.datetimeValue = datetimeValue;
         this.doubleValue = doubleValue;
+        this.booleanValue = booleanValue;
     }
 
     public UUID getId() {
@@ -115,4 +129,13 @@ public class AccountAttributeValueModel {
     public void setDoubleValue(Double doubleValue) {
         this.doubleValue = doubleValue;
     }
+
+    public boolean isBooleanValue() {
+        return booleanValue;
+    }
+
+    public void setBooleanValue(boolean booleanValue) {
+        this.booleanValue = booleanValue;
+    }
 }
+

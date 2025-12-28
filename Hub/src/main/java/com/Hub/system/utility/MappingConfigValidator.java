@@ -3,6 +3,8 @@ package com.Hub.system.utility;
 import com.Hub.account.model.AccountAttributeModel;
 import com.Hub.account.repository.IAccountAttributeRepository;
 import com.Hub.system.dto.MappingConfigModelCreateDTO;
+import com.Hub.system.enums.MappingType;
+import com.Hub.system.model.MappingConfigModel;
 import com.Hub.system.model.SystemModel;
 import com.Hub.system.repository.SystemRepository;
 import org.springframework.stereotype.Component;
@@ -23,10 +25,29 @@ public class MappingConfigValidator {
         this.systemRepository = systemRepository;
     }
 
+
     public void validateMandatoryAttributes(
             List<MappingConfigModelCreateDTO> mappings,
             String systemId
     ) {
+        Set<String> invalidMappings = mappings.stream()
+                .filter(m -> m.mappingType() == null || (
+                        // Case 1: If it's a TRANSFORMATION, it MUST have an expression
+                        (m.mappingType().equalsIgnoreCase("TRANSFORMATION") &&
+                                (m.mappingExpression() == null || m.mappingExpression().expression() == null || m.mappingExpression().expression().isBlank()))
+                                ||
+                                // Case 2: If it's a CONSTANT, it also MUST have an expression (if you're reusing that field)
+                                (m.mappingType().equalsIgnoreCase("CONSTANT") &&
+                                        (m.mappingExpression() == null || m.mappingExpression().expression() == null || m.mappingExpression().expression().isBlank()))
+                ))
+                .map(MappingConfigModelCreateDTO::targetAttribute)
+                .collect(Collectors.toSet());
+
+        if (!invalidMappings.isEmpty()) {
+            throw new IllegalArgumentException("Incomplete mapping configuration for: " + invalidMappings +
+                    ". Ensure all have a mappingType, and TRANSFORMATIONS have an expression.");
+        }
+
         SystemModel system = systemRepository.findBySystemId(Long.valueOf(systemId))
                 .orElseThrow(() -> new RuntimeException("System not found")
                 );
@@ -54,6 +75,7 @@ public class MappingConfigValidator {
                     "Missing mandatory attributes: " + missingAttributes
             );
         }
+
     }
 }
 

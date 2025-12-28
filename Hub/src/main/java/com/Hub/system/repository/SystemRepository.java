@@ -11,4 +11,5 @@ import java.util.UUID;
 @Repository
 public interface SystemRepository extends JpaRepository<SystemModel, UUID> {
     Optional<SystemModel> findBySystemId (Long systemId);
+    Optional<SystemModel> findByName (String name);
 }

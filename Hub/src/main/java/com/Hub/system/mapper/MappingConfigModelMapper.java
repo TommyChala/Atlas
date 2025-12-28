@@ -18,5 +18,6 @@ public interface MappingConfigModelMapper {
     @Mapping(source = "sourceAttribute", target = "sourceAttribute")
     @Mapping(target = "targetAttribute", ignore = true)
     @Mapping(source = "dataType", target = "dataType")
+    @Mapping(source = "mappingType", target = "mappingType")
     public MappingConfigModel toModel (MappingConfigModelCreateDTO mappingConfigModelCreateDTO);
 }

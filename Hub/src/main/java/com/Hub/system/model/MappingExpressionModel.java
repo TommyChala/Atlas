@@ -31,6 +31,8 @@ public class MappingExpressionModel {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public MappingExpressionModel () {}
+
     public MappingExpressionModel(UUID id, MappingConfigModel mappingConfig, String expression, String description, boolean active, LocalDateTime createdAt) {
         this.id = id;
         this.mappingConfig = mappingConfig;
